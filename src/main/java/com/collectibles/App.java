@@ -2,69 +2,73 @@ package com.collectibles;
 
 import static spark.Spark.*;
 import com.google.gson.Gson;
+import java.io.FileReader;
+import java.io.Reader;
 import java.util.*;
+import com.google.gson.reflect.TypeToken;
 
 public class App {
+
     static Gson gson = new Gson();
-    static Map<Integer, Map<String, String>> users = new HashMap<>();
+
+    static class Item {
+        String id;
+        String name;
+        String description;
+        String price;
+    }
 
     public static void main(String[] args) {
 
         port(4567);
 
-        // GET /users — Retrieve all users
-        get("/users", (req, res) -> {
-            res.type("application/json");
-            return gson.toJson(users.values());
-        });
+        List<Item> items = loadItems();
 
-        // GET /users/:id — Retrieve user by ID
-        get("/users/:id", (req, res) -> {
-            int id = Integer.parseInt(req.params(":id"));
-            Map<String, String> user = users.get(id);
-            if (user == null) {
+        path("/items", () -> {
+
+            // GET /items
+            get("", (req, res) -> {
+                res.type("application/json");
+
+                List<Map<String, Object>> basicInfo = new ArrayList<>();
+                for (Item i : items) {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("id", i.id);
+                    data.put("name", i.name);
+                    data.put("price", i.price);
+                    basicInfo.add(data);
+                }
+                return gson.toJson(basicInfo);
+            });
+
+            // GET /items/:id
+            get("/:id", (req, res) -> {
+                res.type("application/json");
+                String id = req.params(":id");
+
+                for (Item i : items) {
+                    if (i.id.equals(id)) {
+                        return gson.toJson(Map.of(
+                                "id", i.id,
+                                "name", i.name,
+                                "description", i.description
+                        ));
+                    }
+                }
                 res.status(404);
-                return gson.toJson(Map.of("error", "User not found"));
-            }
-            return gson.toJson(user);
-        });
+                return gson.toJson(Map.of("error", "Item not found"));
+            });
 
-        // POST /users/:id — Add user
-        post("/users/:id", (req, res) -> {
-            int id = Integer.parseInt(req.params(":id"));
-            Map<String, String> user = gson.fromJson(req.body(), Map.class);
-            users.put(id, user);
-            res.status(201);
-            return gson.toJson(Map.of("message", "User added successfully"));
-        });
-
-        // PUT /users/:id — Edit user
-        put("/users/:id", (req, res) -> {
-            int id = Integer.parseInt(req.params(":id"));
-            if (!users.containsKey(id)) {
-                res.status(404);
-                return gson.toJson(Map.of("error", "User not found"));
-            }
-            Map<String, String> updatedUser = gson.fromJson(req.body(), Map.class);
-            users.put(id, updatedUser);
-            return gson.toJson(Map.of("message", "User updated successfully"));
-        });
-
-        // OPTIONS /users/:id — Check existence
-        options("/users/:id", (req, res) -> {
-            int id = Integer.parseInt(req.params(":id"));
-            boolean exists = users.containsKey(id);
-            return gson.toJson(Map.of("exists", exists));
-        });
-
-        // DELETE /users/:id — Delete user
-        delete("/users/:id", (req, res) -> {
-            int id = Integer.parseInt(req.params(":id"));
-            if (users.remove(id) == null) {
-                res.status(404);
-                return gson.toJson(Map.of("error", "User not found"));
-            }
-            return gson.toJson(Map.of("message", "User deleted successfully"));
         });
     }
+
+    private static List<Item> loadItems() {
+        try (Reader reader = new FileReader("src/main/resources/items.json")) {
+            return gson.fromJson(reader, new TypeToken<List<Item>>(){}.getType());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
 }
+
