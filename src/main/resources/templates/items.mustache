@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><title>Collectibles Store</title></head>
+<body>
+<h1>Available Items</h1>
+<ul>
+    {{#items}}
+    <li>
+        <b>{{name}}</b> - {{price}}
+        [<a href="/items/{{id}}">View details</a>]
+    </li>
+    {{/items}}
+</ul>
+<a href="/offer">Make an Offer</a>
+</body>
+</html>
+
