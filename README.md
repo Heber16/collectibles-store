@@ -69,9 +69,6 @@ http://localhost:4567/items
 http://localhost:4567/items/1
  → item details
 
-http://localhost:4567/items/new
- → add new item form
-
 🧾 Peer Review Summary
 
 See peer-review.md
