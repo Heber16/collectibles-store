@@ -1,17 +1,76 @@
 <!DOCTYPE html>
-<html>
-<head><title>Collectibles Store</title></head>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Collectibles Store - Items</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+    h1 { color: #333; }
+    .filters { background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    .filters input, .filters button { padding: 8px; margin: 5px; }
+    .filters button { background: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px; }
+    .filters button:hover { background: #0056b3; }
+    .item-list { list-style: none; padding: 0; }
+    .item-list li { background: white; border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; }
+    .item-list li:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .item-price { font-weight: bold; color: #28a745; }
+    .nav-link { display: inline-block; margin: 10px 5px; padding: 8px 15px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; }
+    .nav-link:hover { background: #545b62; }
+  </style>
+</head>
 <body>
-<h1>Available Items</h1>
-<ul>
+  <h1>🎨 Collectibles Store</h1>
+
+  <nav>
+    <a href="/items" class="nav-link">Items</a>
+    <a href="/offer" class="nav-link">Make an Offer</a>
+    <a href="/offers" class="nav-link">View Offers</a>
+  </nav>
+
+  <div class="filters">
+    <h3>🔍 Filters</h3>
+    <form method="GET" action="/items">
+      <input type="text" name="q" placeholder="Search by name or description..." value="{{searchQuery}}" style="width: 300px;">
+      <input type="number" name="minPrice" placeholder="Min Price" value="{{minPrice}}" step="0.01" style="width: 100px;">
+      <input type="number" name="maxPrice" placeholder="Max Price" value="{{maxPrice}}" step="0.01" style="width: 100px;">
+      <button type="submit">Search</button>
+      <a href="/items"><button type="button">Clear Filters</button></a>
+    </form>
+  </div>
+
+  {{#hasFilters}}
+  <p><em>Showing filtered results</em></p>
+  {{/hasFilters}}
+
+  <ul class="item-list">
     {{#items}}
-    <li>
-        <b>{{name}}</b> - {{price}}
-        [<a href="/items/{{id}}">View details</a>]
+    <li data-item-id="{{id}}">
+      <b>{{name}}</b> - <span class="item-price">{{price}}</span>
+      <br>
+      <a href="/items/{{id}}">View Details</a> |
+      <a href="/items/{{id}}/price">Update Price</a> |
+      <a href="/offer?itemId={{id}}">Make Offer</a>
     </li>
     {{/items}}
-</ul>
-<a href="/offer">Make an Offer</a>
+  </ul>
+
+  {{^items}}
+  <p>No items found matching your criteria.</p>
+  {{/items}}
+
+  <script>
+    const ws = new WebSocket('ws://localhost:8081');
+
+    ws.onopen = () => console.log('✅ WebSocket connected');
+    ws.onerror = (err) => console.error('❌ WebSocket error:', err);
+    ws.onmessage = (evt) => {
+      const msg = JSON.parse(evt.data);
+      if (msg.type === 'price_update') {
+        console.log('🔄 Price updated:', msg);
+        const el = document.querySelector(`[data-item-id="${msg.id}"] .item-price`);
+        if (el) el.textContent = msg.price;
+      }
+    };
+  </script>
 </body>
 </html>
-

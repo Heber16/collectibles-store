@@ -1,10 +1,46 @@
 <!DOCTYPE html>
-<html>
-<head><title>{{name}} Details</title></head>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>{{item.name}} - Details</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    .item-detail { background: white; border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
+    .price { font-size: 24px; font-weight: bold; color: #28a745; margin: 15px 0; }
+    .actions { margin-top: 20px; }
+    .btn { display: inline-block; padding: 10px 20px; margin: 5px; text-decoration: none; border-radius: 4px; color: white; }
+    .btn-primary { background: #007bff; }
+    .btn-success { background: #28a745; }
+    .btn-secondary { background: #6c757d; }
+    .btn:hover { opacity: 0.9; }
+  </style>
+</head>
 <body>
-<h1>{{name}}</h1>
-<p>{{description}}</p>
-<p><b>Price:</b> {{price}}</p>
-<a href="/items">Back to items</a>
+  <h1>{{item.name}}</h1>
+
+  <div class="item-detail" data-item-id="{{item.id}}">
+    <p><strong>Description:</strong> {{item.description}}</p>
+    <p class="price" id="current-price">{{item.price}}</p>
+
+    <div class="actions">
+      <a href="/items/{{item.id}}/price" class="btn btn-primary">Update Price</a>
+      <a href="/offer?itemId={{item.id}}" class="btn btn-success">Make an Offer</a>
+      <a href="/items" class="btn btn-secondary">Back to Items</a>
+    </div>
+  </div>
+
+  <script>
+    const ws = new WebSocket('ws://localhost:8081');
+    const itemId = '{{item.id}}';
+
+    ws.onopen = () => console.log('✅ WebSocket connected');
+    ws.onmessage = (evt) => {
+      const msg = JSON.parse(evt.data);
+      if (msg.type === 'price_update' && msg.id === itemId) {
+        console.log('🔄 Price updated for this item:', msg);
+        document.getElementById('current-price').textContent = msg.price;
+      }
+    };
+  </script>
 </body>
 </html>

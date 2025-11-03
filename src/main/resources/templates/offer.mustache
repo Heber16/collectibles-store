@@ -1,16 +1,75 @@
 <!DOCTYPE html>
-<html>
-<head><title>Make an Offer</title></head>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Make an Offer</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 700px; margin: 50px auto; padding: 20px; }
+    .form-container { background: white; border: 1px solid #ddd; padding: 30px; border-radius: 8px; }
+    .form-group { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+    textarea { height: 100px; resize: vertical; }
+    button { padding: 12px 30px; background: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px; font-size: 16px; }
+    button:hover { background: #218838; }
+    .selected-item { background: #e7f3ff; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+    a { color: #6c757d; text-decoration: none; }
+  </style>
+</head>
 <body>
-<h1>Submit an Offer</h1>
-<form action="/offer" method="post">
-    <label>Name:</label><br>
-    <input type="text" name="name" required><br><br>
-    <label>Item ID:</label><br>
-    <input type="text" name="itemId" required><br><br>
-    <label>Offer Amount (USD):</label><br>
-    <input type="number" name="amount" required><br><br>
-    <button type="submit">Submit Offer</button>
-</form>
+  <div class="form-container">
+    <h1>📝 Make an Offer</h1>
+
+    {{#preselected}}
+    <div class="selected-item">
+      <strong>Selected Item:</strong> {{item.name}}<br>
+      <strong>Current Price:</strong> {{item.price}}
+    </div>
+    {{/preselected}}
+
+    <form method="POST" action="/offer">
+      <div class="form-group">
+        <label for="itemId">Select Item:</label>
+        <select id="itemId" name="itemId" required {{#preselected}}disabled{{/preselected}}>
+          {{#preselected}}
+          <option value="{{item.id}}" selected>{{item.name}} - {{item.price}}</option>
+          {{/preselected}}
+          {{^preselected}}
+          <option value="">-- Choose an item --</option>
+          {{#items}}
+          <option value="{{id}}">{{name}} - {{price}}</option>
+          {{/items}}
+          {{/preselected}}
+        </select>
+        {{#preselected}}
+        <input type="hidden" name="itemId" value="{{item.id}}">
+        {{/preselected}}
+      </div>
+
+      <div class="form-group">
+        <label for="customerName">Your Name:</label>
+        <input type="text" id="customerName" name="customerName" required>
+      </div>
+
+      <div class="form-group">
+        <label for="customerEmail">Your Email:</label>
+        <input type="email" id="customerEmail" name="customerEmail" required>
+      </div>
+
+      <div class="form-group">
+        <label for="offerAmount">Your Offer Amount (USD):</label>
+        <input type="number" id="offerAmount" name="offerAmount" step="0.01" min="0" required>
+      </div>
+
+      <div class="form-group">
+        <label for="message">Message (optional):</label>
+        <textarea id="message" name="message" placeholder="Tell us why you want this item..."></textarea>
+      </div>
+
+      <button type="submit">Submit Offer</button>
+    </form>
+
+    <p><a href="/items">← Back to Items</a></p>
+  </div>
 </body>
 </html>

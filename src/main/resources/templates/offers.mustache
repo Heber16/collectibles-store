@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>All Offers</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; }
+    .success-message { background: #d4edda; color: #155724; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+    .offer-card { background: white; border: 1px solid #ddd; padding: 20px; margin: 15px 0; border-radius: 8px; }
+    .offer-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+    .status { padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+    .status-pending { background: #ffc107; color: #000; }
+    .status-accepted { background: #28a745; color: white; }
+    .status-rejected { background: #dc3545; color: white; }
+    .nav-link { display: inline-block; margin: 10px 5px; padding: 8px 15px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; }
+    .nav-link:hover { background: #545b62; }
+  </style>
+</head>
+<body>
+  <h1>📋 All Offers</h1>
+
+  <nav>
+    <a href="/items" class="nav-link">Items</a>
+    <a href="/offer" class="nav-link">Make an Offer</a>
+  </nav>
+
+  {{#success}}
+  <div class="success-message">
+    ✅ Your offer has been submitted successfully!
+  </div>
+  {{/success}}
+
+  {{#offers}}
+  <div class="offer-card">
+    <div class="offer-header">
+      <div>
+        <h3>{{itemName}}</h3>
+        <p><strong>Customer:</strong> {{customerName}} ({{customerEmail}})</p>
+      </div>
+      <span class="status status-{{status}}">{{status}}</span>
+    </div>
+    <p><strong>Offer Amount:</strong> {{formattedAmount}}</p>
+    {{#message}}
+    <p><strong>Message:</strong> {{message}}</p>
+    {{/message}}
+    <p style="color: #666; font-size: 12px;">Submitted: {{timestamp}}</p>
+  </div>
+  {{/offers}}
+
+  {{^offers}}
+  <p>No offers have been submitted yet.</p>
+  {{/offers}}
+</body>
+</html>
